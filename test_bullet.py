@@ -1,7 +1,7 @@
 import pygame
 import random
 import math
-
+from time import time
 pygame.init()
 
 
@@ -14,19 +14,41 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(x, y))
         self.direction = direction
         self.bounce_count = 0
+        self.hits = 0
+        self.move_x = self.direction[0]
+        self.move_y = self.direction[1]
+        self.colision_initial_time = time()
+        self.colision_final_time = time()
+
 
     def update(self, walls, bullets):
-        self.rect.x += self.direction[0] * 5
-        self.rect.y += self.direction[1] * 5
+        self.colision_final_time = time()
 
-        # handle wall collision
-        for wall in walls:
-            if self.rect.colliderect(wall.rect):
-                self.direction = self.get_random_direction()
-                self.bounce_count += 1
-                if self.bounce_count >= 6:
-                    self.kill()
-                break
+        self.rect.x += self.move_x * 1
+        self.collision('horizontal', walls)
+
+        self.rect.y += self.move_y * 1
+        self.collision('vertical', walls)
+
+        if self.hits >= 6:
+            self.kill()
+
+    def collision(self, direction,walls):
+        if direction == 'horizontal':
+            for wall in walls:
+                if self.colision_final_time - self.colision_initial_time > 0.1:
+                    if self.rect.colliderect(wall):
+                        self.move_x *= -1
+                        self.colision_initial_time = time()
+                        self.hits += 1
+
+        if direction == 'vertical':
+            for wall in walls:
+                if self.colision_final_time - self.colision_initial_time > 0.1:
+                    if self.rect.colliderect(wall):
+                        self.move_y *= -1
+                        self.colision_initial_time = time()
+                        self.hits += 1
 
     @staticmethod
     def get_random_direction():
