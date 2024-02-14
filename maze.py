@@ -1,5 +1,5 @@
 import pygame
-from test_wall import Wall
+from wall import Wall
 
 pygame.init()
 

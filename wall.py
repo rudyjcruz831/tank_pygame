@@ -1,4 +1,4 @@
-from sizes import BLOCK_SIZE
+from utils.sizes import BLOCK_SIZE
 import pygame
 
 pygame.init()
