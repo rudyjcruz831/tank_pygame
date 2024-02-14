@@ -5,10 +5,10 @@ from maze import Maze
 from utils.maze_list import MAZE_LIST
 from bullet import Bullet
 from tank import Tank
-from fonts import screen_font, screen_font_bold
-from utils.colors import BLACK, WHITE, RED, COLORS
+from utils.colors import WHITE, RED, COLORS
 from utils.sizes import BLOCK_SIZE, MAZE_WIDTH, MAZE_HEIGHT
 from sfx import shoot_sound_effect
+from utils.menu import draw_menu
 
 pygame.init()
 # maze pattern
@@ -17,7 +17,7 @@ pattern = random.choice(MAZE_LIST)
 maze_color = random.choice(COLORS)
 bg_color = random.choice(COLORS)
 
-while bg_color == maze_color:
+while bg_color == maze_color or bg_color == COLORS[0]:
     bg_color = random.choice(COLORS)
 
 
@@ -55,10 +55,8 @@ class Game:
                 if self.game_start:
                     if event.key == pygame.K_SPACE:
                         self.fire_bullet(self.tank1)
-                        shoot_sound_effect.play()
                     elif event.key == pygame.K_RETURN:
                         self.fire_bullet(self.tank2)
-                        shoot_sound_effect.play()
                 # handle menu screen events
                 elif not self.game_start:
                     if event.key == pygame.K_SPACE and not self.show_credits:
@@ -78,49 +76,15 @@ class Game:
         # draw tank and bullets
         self.all_sprites.draw(self.screen)
 
-    def draw_menu(self):
-        self.screen.fill(BLACK)
-        # create title
-        title_txt = "TANK - COMBAT" if not self.show_credits else "CREDITS"
-        title = screen_font_bold.render(title_txt, True, WHITE, BLACK)
-        title_w = title.get_width()
-        title_h = title.get_height()
-        if not self.show_credits:
-            # Subtitle
-            subtitle_txt = "[Play game (space)] | [Show credits (enter)]"
-            subtitle = screen_font.render(subtitle_txt, True, WHITE, BLACK)
-            subtitle_w = subtitle.get_width()
-            # Draw title and subtitle
-            self.screen.blit(title, (self.mid_w - title_w // 2, self.mid_h - title_h // 2))
-            self.screen.blit(subtitle, (self.mid_w - subtitle_w // 2, self.mid_h + title_h // 2))
-        else:
-            # draw title
-            self.screen.blit(title, (self.mid_w - title_w // 2, (self.mid_h // 2) - title_h // 2))
-            # subtitles
-            credit_rows = [
-                "<----- DEVELOPERS ----->",
-                "Pedro Yutaro Mont Morency Nakamura",
-                "Aline Daffiny Ferreira Gomes",
-                "Leonardo Melo Crispim",
-                "<----- SPRITE SOURCE ----->",
-                "Dune 2: TBD",
-                "[Back to menu (enter)]"
-            ]
-            # draw each subtitle
-            space = 40
-            for row in credit_rows:
-                subtitle = screen_font.render(row, True, WHITE, BLACK)
-                subtitle_w = subtitle.get_width()
-                space += 80 if credit_rows.index(row) in (4, 6) else 40
-                self.screen.blit(subtitle, (self.mid_w - subtitle_w // 2, (self.mid_h + title_h) // 2 + space))
-
     def fire_bullet(self, tank):
+        # handle bullet dir based on tank
         bullet_direction = (0, 0)
         if tank == self.tank1:
             bullet_direction = (self.tank1.block_dx / 3, self.tank1.block_dy / 3)
         elif tank == self.tank2:
-            bullet_direction = (self.tank2.block_dx/3, self.tank2.block_dy/3)
+            bullet_direction = (self.tank2.block_dx / 3, self.tank2.block_dy / 3)
         bullet = Bullet(tank.rect_block.centerx, tank.rect_block.centery, bullet_direction, RED)
+        shoot_sound_effect.play()
         self.bullets.add(bullet)
         self.all_sprites.add(bullet)
 
@@ -130,7 +94,7 @@ class Game:
             if self.game_start:
                 self.draw_game()
             else:
-                self.draw_menu()
+                draw_menu(self.screen, self.show_credits, self.mid_w, self.mid_h)
             self.update()
             self.handle_events()
             pygame.display.flip()

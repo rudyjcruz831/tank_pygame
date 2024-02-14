@@ -14,6 +14,7 @@ class Tank(pygame.sprite.Sprite):
         self.image = pygame.Surface((size, size))
         self.image.fill(color)
         # physics
+        self.spawned = True
         self.rect = self.image.get_rect(topleft=(x * size, y * size))
         self.dx = 0
         self.dy = 0
@@ -23,7 +24,17 @@ class Tank(pygame.sprite.Sprite):
         self.block_dx = 0
         self.block_dy = 0
 
+    def tank_respawn(self):
+        if self.spawned:
+            if self.id == 1:
+                self.go_to('right')
+            else:
+                self.go_to('left')
+        self.spawned = False
+
     def update(self, walls, bullets):
+        # handle initial tank position
+        self.tank_respawn()
         self.rect_block.centerx = self.rect.centerx + self.block_dx
         self.rect_block.centery = self.rect.centery + self.block_dy
         # handle movement
@@ -113,6 +124,3 @@ class Tank(pygame.sprite.Sprite):
     def draw_pointer(self, screen):
         # draws black square as a pointer of tank direction
         pygame.draw.rect(screen, (0, 0, 0), self.rect_block)
-
-    def fire_bullet(self):
-        pass

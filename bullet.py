@@ -1,9 +1,10 @@
+from sfx import hit_sound_effect
 import pygame
 import random
 import math
 from time import time
+
 pygame.init()
-from sfx import hit_sound_effect
 
 
 class Bullet(pygame.sprite.Sprite):
