@@ -1,14 +1,14 @@
 import pygame
 import sys
 import random
-from test_maze import Maze
-from maze_list import MAZE_LIST
-from test_bullet import Bullet
-from test_tank import Tank
-from fonts import hud_font, screen_font, screen_font_bold
-from sfx import hit_sound_effect, scoring_sound_effect, damage_sound_effect, shoot_sound_effect
-from colors import BLACK, WHITE, RED, COLORS
-from sizes import BLOCK_SIZE, MAZE_WIDTH, MAZE_HEIGHT
+from maze import Maze
+from utils.maze_list import MAZE_LIST
+from bullet import Bullet
+from tank import Tank
+from fonts import screen_font, screen_font_bold
+from utils.colors import BLACK, WHITE, RED, COLORS
+from utils.sizes import BLOCK_SIZE, MAZE_WIDTH, MAZE_HEIGHT
+from sfx import shoot_sound_effect
 
 pygame.init()
 # maze pattern
@@ -51,12 +51,14 @@ class Game:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     quit_game()
-                # handle game events
+                # handle shooting
                 if self.game_start:
                     if event.key == pygame.K_SPACE:
                         self.fire_bullet(self.tank1)
+                        shoot_sound_effect.play()
                     elif event.key == pygame.K_RETURN:
                         self.fire_bullet(self.tank2)
+                        shoot_sound_effect.play()
                 # handle menu screen events
                 elif not self.game_start:
                     if event.key == pygame.K_SPACE and not self.show_credits:
@@ -66,12 +68,14 @@ class Game:
 
     def update(self):
         self.all_sprites.update(self.maze.walls, self.bullets)
-        self.tank1.draw(self.screen)
-        self.tank2.draw(self.screen)
+        # tanks dir
+        self.tank1.draw_pointer(self.screen)
+        self.tank2.draw_pointer(self.screen)
 
     def draw_game(self):
         self.screen.fill(bg_color)
         self.maze.draw(self.screen)
+        # draw tank and bullets
         self.all_sprites.draw(self.screen)
 
     def draw_menu(self):
