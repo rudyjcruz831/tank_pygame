@@ -38,8 +38,8 @@ class Game:
         pygame.display.set_caption("Tank Maze - Atari 2600")
         self.clock = pygame.time.Clock()
         self.maze = Maze(pattern, maze_color)
-        self.tank1 = Tank(1, 1, WHITE, BLOCK_SIZE)
-        self.tank2 = Tank(MAZE_WIDTH - 2, MAZE_HEIGHT - 2, WHITE, BLOCK_SIZE)
+        self.tank1 = Tank(1, 1, WHITE, BLOCK_SIZE, 1, self.maze.walls)
+        self.tank2 = Tank(MAZE_WIDTH - 2, MAZE_HEIGHT - 2, WHITE, BLOCK_SIZE, 2, self.maze.walls)
         self.bullets = pygame.sprite.Group()
         self.all_sprites = pygame.sprite.Group()
         self.all_sprites.add(self.tank1, self.tank2)
@@ -65,26 +65,9 @@ class Game:
                         self.show_credits = not self.show_credits
 
     def update(self):
-        self.tank1.dx, self.tank1.dy = 0, 0
-        self.tank2.dx, self.tank2.dy = 0, 0
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            self.tank1.dx = -5
-        elif keys[pygame.K_RIGHT]:
-            self.tank1.dx = 5
-        elif keys[pygame.K_UP]:
-            self.tank1.dy = -5
-        elif keys[pygame.K_DOWN]:
-            self.tank1.dy = 5
-        if keys[pygame.K_a]:
-            self.tank2.dx = -5
-        elif keys[pygame.K_d]:
-            self.tank2.dx = 5
-        elif keys[pygame.K_w]:
-            self.tank2.dy = -5
-        elif keys[pygame.K_s]:
-            self.tank2.dy = 5
         self.all_sprites.update(self.maze.walls, self.bullets)
+        self.tank1.draw(self.screen)
+        self.tank2.draw(self.screen)
 
     def draw_game(self):
         self.screen.fill(bg_color)
@@ -130,10 +113,10 @@ class Game:
     def fire_bullet(self, tank):
         bullet_direction = (0, 0)
         if tank == self.tank1:
-            bullet_direction = (self.tank1.dx, self.tank1.dy)
+            bullet_direction = (self.tank1.block_dx / 3, self.tank1.block_dy / 3)
         elif tank == self.tank2:
-            bullet_direction = (self.tank2.dx, self.tank2.dy)
-        bullet = Bullet(tank.rect.centerx + 5, tank.rect.centery + 5, bullet_direction, RED)
+            bullet_direction = (self.tank2.block_dx/3, self.tank2.block_dy/3)
+        bullet = Bullet(tank.rect_block.centerx, tank.rect_block.centery, bullet_direction, RED)
         self.bullets.add(bullet)
         self.all_sprites.add(bullet)
 
