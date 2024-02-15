@@ -9,6 +9,7 @@ from utils.colors import WHITE, RED, COLORS
 from utils.sizes import BLOCK_SIZE, MAZE_WIDTH, MAZE_HEIGHT
 from sfx import shoot_sound_effect
 from utils.menu import draw_menu
+from time import time
 
 pygame.init()
 # maze pattern
@@ -43,6 +44,11 @@ class Game:
         self.bullets = pygame.sprite.Group()
         self.all_sprites = pygame.sprite.Group()
         self.all_sprites.add(self.tank1, self.tank2)
+        self.tank1_initial_time = time()
+        print(self.tank1_initial_time)
+        self.tank1_final_time = time()
+        self.tank2_initial_time = time()
+        self.tank2_final_time = time()
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -63,8 +69,10 @@ class Game:
                         self.game_start = True
                     elif event.key == pygame.K_RETURN:
                         self.show_credits = not self.show_credits
-
     def update(self):
+        self.tank1_final_time = time()
+        self.tank2_final_time = time()
+
         self.all_sprites.update(self.maze.walls, self.bullets)
         # tanks dir
         self.tank1.draw_pointer(self.screen)
@@ -80,13 +88,21 @@ class Game:
         # handle bullet dir based on tank
         bullet_direction = (0, 0)
         if tank == self.tank1:
-            bullet_direction = (self.tank1.block_dx / 3, self.tank1.block_dy / 3)
+            if self.tank1_final_time - self.tank1_initial_time > 3:
+                bullet_direction = (self.tank1.block_dx / 3, self.tank1.block_dy / 3)
+                self.tank1_initial_time = time()
+                bullet = Bullet(tank.rect_block.centerx, tank.rect_block.centery, bullet_direction, RED)
+                shoot_sound_effect.play()
+                self.bullets.add(bullet)
+                self.all_sprites.add(bullet)
         elif tank == self.tank2:
-            bullet_direction = (self.tank2.block_dx / 3, self.tank2.block_dy / 3)
-        bullet = Bullet(tank.rect_block.centerx, tank.rect_block.centery, bullet_direction, RED)
-        shoot_sound_effect.play()
-        self.bullets.add(bullet)
-        self.all_sprites.add(bullet)
+            if self.tank2_final_time - self.tank2_initial_time > 3:
+                bullet_direction = (self.tank2.block_dx / 3, self.tank2.block_dy / 3)
+                bullet = Bullet(tank.rect_block.centerx, tank.rect_block.centery, bullet_direction, RED)
+                self.tank2_initial_time = time()
+                shoot_sound_effect.play()
+                self.bullets.add(bullet)
+                self.all_sprites.add(bullet)
 
     def run(self):
         running = True
