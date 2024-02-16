@@ -39,15 +39,14 @@ class Tank(pygame.sprite.Sprite):
         self.rect_block.centery = self.rect.centery + self.block_dy
         # handle movement
         self.rect.x += self.dx
-        self.rect.y += self.dy
-        # handle collision
         self.collider_wall('horizontal')
+
+        self.rect.y += self.dy
         self.collider_wall('vertical')
         # handle bullet collision
         bullet_hit = pygame.sprite.spritecollideany(self, bullets)
         if bullet_hit:
             self.death()  # assuming death method handles tank removal
-            bullets.death()
         self.move()
 
     def go_to(self, direction):
