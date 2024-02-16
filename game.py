@@ -40,6 +40,7 @@ class Game:
         self.maze = Maze(pattern, maze_color)
         self.tank1 = Tank(1, 1, WHITE, BLOCK_SIZE, 1, self.maze.walls)
         self.tank2 = Tank(MAZE_WIDTH - 2, MAZE_HEIGHT - 2, WHITE, BLOCK_SIZE, 2, self.maze.walls)
+        # sprite grouping
         self.bullets = pygame.sprite.Group()
         self.all_sprites = pygame.sprite.Group()
         self.all_sprites.add(self.tank1, self.tank2)
@@ -65,6 +66,7 @@ class Game:
                         self.show_credits = not self.show_credits
 
     def update(self):
+        # tank and bullet receives walls and bullets
         self.all_sprites.update(self.maze.walls, self.bullets)
         # tanks dir
         self.tank1.draw_pointer(self.screen)
