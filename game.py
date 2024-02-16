@@ -29,26 +29,30 @@ def quit_game():
 
 class Game:
     def __init__(self):
+        # screen settings
         self.width = MAZE_WIDTH * BLOCK_SIZE
         self.mid_w = self.width // 2
         self.height = MAZE_HEIGHT * BLOCK_SIZE
         self.mid_h = self.height // 2
+        self.screen = pygame.display.set_mode((self.width, self.height))
+        pygame.display.set_caption("Combat - Tank (Atari 2600)")
+        # game controls
         self.game_start = False
         self.show_credits = False
-        self.screen = pygame.display.set_mode((self.width, self.height))
-        pygame.display.set_caption("Tank Maze - Atari 2600")
         self.clock = pygame.time.Clock()
+        # maze
         self.maze = Maze(pattern, maze_color)
+        # tanks
         self.tank1 = Tank(1, 1, WHITE, BLOCK_SIZE, 1, self.maze.walls)
+        self.tank1_initial_time = time()
+        self.tank1_final_time = time()
         self.tank2 = Tank(MAZE_WIDTH - 2, MAZE_HEIGHT - 2, WHITE, BLOCK_SIZE, 2, self.maze.walls)
+        self.tank2_initial_time = time()
+        self.tank2_final_time = time()
+        # bullet and sprite groups
         self.bullets = pygame.sprite.Group()
         self.all_sprites = pygame.sprite.Group()
         self.all_sprites.add(self.tank1, self.tank2)
-        self.tank1_initial_time = time()
-        print(self.tank1_initial_time)
-        self.tank1_final_time = time()
-        self.tank2_initial_time = time()
-        self.tank2_final_time = time()
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -69,14 +73,16 @@ class Game:
                         self.game_start = True
                     elif event.key == pygame.K_RETURN:
                         self.show_credits = not self.show_credits
-    def update(self):
-        self.tank1_final_time = time()
-        self.tank2_final_time = time()
 
-        self.all_sprites.update(self.maze.walls, self.bullets)
+    def update(self):
         # tanks dir
         self.tank1.draw_pointer(self.screen)
         self.tank2.draw_pointer(self.screen)
+        # tanks shoot waiting
+        self.tank1_final_time = time()
+        self.tank2_final_time = time()
+        # update all
+        self.all_sprites.update(self.maze.walls, self.bullets)
 
     def draw_game(self):
         self.screen.fill(bg_color)
@@ -86,9 +92,8 @@ class Game:
 
     def fire_bullet(self, tank):
         # handle bullet dir based on tank
-        bullet_direction = (0, 0)
         if tank == self.tank1:
-            if self.tank1_final_time - self.tank1_initial_time > 3:
+            if self.tank1_final_time - self.tank1_initial_time > 2:
                 bullet_direction = (self.tank1.block_dx / 3, self.tank1.block_dy / 3)
                 self.tank1_initial_time = time()
                 bullet = Bullet(tank.rect_block.centerx, tank.rect_block.centery, bullet_direction, RED)
@@ -96,7 +101,7 @@ class Game:
                 self.bullets.add(bullet)
                 self.all_sprites.add(bullet)
         elif tank == self.tank2:
-            if self.tank2_final_time - self.tank2_initial_time > 3:
+            if self.tank2_final_time - self.tank2_initial_time > 2:
                 bullet_direction = (self.tank2.block_dx / 3, self.tank2.block_dy / 3)
                 bullet = Bullet(tank.rect_block.centerx, tank.rect_block.centery, bullet_direction, RED)
                 self.tank2_initial_time = time()
