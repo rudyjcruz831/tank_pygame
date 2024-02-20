@@ -6,9 +6,9 @@ from utils.maze_list import MAZE_LIST
 from tank import Tank
 from utils.colors import WHITE, COL_GROUP_1, COL_GROUP_2
 from utils.sizes import BLOCK_SIZE, MAZE_WIDTH, MAZE_HEIGHT
-from sfx import damage_sound_effect
+from sfx import damage_sound_effect, scoring_sound_effect
 from utils.menu import draw_menu
-from time import time
+from utils.hud import draw_hud
 
 pygame.init()
 
@@ -28,11 +28,14 @@ class Game:
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("Combat - Tank (Atari 2600)")
         # game controls
+        self.clock = pygame.time.Clock()
         self.game_start = False
+        self.game_over = False
         self.show_credits = False
         self.tank1_died = False
         self.tank2_died = False
-        self.clock = pygame.time.Clock()
+        self.MAX_TIME = 60 + 60 + 60
+        self.start_time = pygame.time.get_ticks()
         # background
         self.bg_color = random.choice(COL_GROUP_1)
         # maze
@@ -42,7 +45,7 @@ class Game:
         # tanks
         self.tank1 = Tank(1, 1, WHITE, BLOCK_SIZE, 1, self.maze.walls)
         self.tank2 = Tank(MAZE_WIDTH - 2, MAZE_HEIGHT - 2, WHITE, BLOCK_SIZE, 2, self.maze.walls)
-        # bullet and sprite groups
+        # sprite groups
         self.all_sprites = pygame.sprite.Group()
         self.all_sprites.add(self.tank1, self.tank2)
         # player groups
@@ -65,9 +68,14 @@ class Game:
                         self.tank2.fire_bullet()
                 # handle menu screen events
                 elif not self.game_start:
+                    # starts new game
                     if event.key == pygame.K_SPACE and not self.show_credits:
+                        self.start_time = pygame.time.get_ticks()
                         self.game_start = True
-                    elif event.key == pygame.K_RETURN:
+                        self.game_over = False
+                        self.tank1.score = self.tank2.score = 0
+                    # show credits
+                    elif event.key == pygame.K_RETURN and not self.game_over:
                         self.show_credits = not self.show_credits
 
     def handle_next_round(self, tank):
@@ -87,6 +95,7 @@ class Game:
         # respawn fired tank
         tank.respawn()
         tank.life = 1
+        scoring_sound_effect.play()
 
     def draw_player(self, tank):
         if tank.life > 0:
@@ -102,8 +111,9 @@ class Game:
                 if other_player.id != player.id:
                     collisions = pygame.sprite.spritecollide(player, other_player.bullets, True)
                     if collisions:
-                        player.life -= 1
                         damage_sound_effect.play()
+                        player.life -= 1
+                        other_player.score += 1
         # draw tanks
         for player in self.players:
             self.draw_player(player)
@@ -120,9 +130,35 @@ class Game:
         running = True
         while running:
             if self.game_start:
+                # game scenario
                 self.draw_game()
+                # game time countdown
+                time_elapsed = (pygame.time.get_ticks() - self.start_time) // 1000
+                if time_elapsed >= self.MAX_TIME:
+                    self.game_start = False
+                    self.game_over = True
+                # game hud
+                draw_hud(self.width, self.screen, self.tank1.score, self.tank2.score, time_elapsed, self.MAX_TIME)
+            elif self.game_over:
+                draw_menu(
+                    self.tank1.score,
+                    self.tank2.score,
+                    self.game_over,
+                    self.screen,
+                    self.show_credits,
+                    self.mid_w,
+                    self.mid_h
+                )
             else:
-                draw_menu(self.screen, self.show_credits, self.mid_w, self.mid_h)
+                draw_menu(
+                    self.tank1.score,
+                    self.tank2.score,
+                    self.game_over,
+                    self.screen,
+                    self.show_credits,
+                    self.mid_w,
+                    self.mid_h
+                )
             self.update()
             self.handle_events()
             pygame.display.flip()

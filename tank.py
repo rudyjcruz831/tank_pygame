@@ -29,6 +29,7 @@ class Tank(pygame.sprite.Sprite):
         self.tank1_final_time = time()
         self.tank2_initial_time = time()
         self.tank2_final_time = time()
+        self.score = 0
         # bullet and sprite groups
         self.all_sprites = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
