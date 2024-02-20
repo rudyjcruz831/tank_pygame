@@ -34,7 +34,7 @@ class Tank(pygame.sprite.Sprite):
         self.bullets = pygame.sprite.Group()
         self.life = 1
 
-    def tank_respawn(self):
+    def handle_initial_dir(self):
         if self.spawned:
             if self.id == 1:
                 self.go_to('right')
@@ -44,23 +44,18 @@ class Tank(pygame.sprite.Sprite):
 
     def update(self, walls):
         # handle initial tank position
-        self.tank_respawn()
+        self.handle_initial_dir()
         self.rect_block.centerx = self.rect.centerx + self.block_dx
         self.rect_block.centery = self.rect.centery + self.block_dy
         self.rect.x += self.dx
         self.collider_wall('horizontal')
         self.rect.y += self.dy
         self.collider_wall('vertical')
-        # handle bullet collision
-        bullet_hit = pygame.sprite.spritecollideany(self, self.bullets)
-        if bullet_hit:
-            pass
         self.move()
         self.tank1_final_time = time()
         self.tank2_final_time = time()
 
     def go_to(self, direction):
-        print(self.life)
         if direction == 'up':
             self.dy = -5
             self.block_dy = -35
@@ -129,12 +124,11 @@ class Tank(pygame.sprite.Sprite):
                     if self.dy < 0:
                         self.rect.top = wall.rect.bottom
 
-    def death(self):
-        # moves tank out of screen
-        self.rect.topleft = (1000, 1000)
+    def respawn(self):
+        self.rect.topleft = (50, 50)
 
     def draw_pointer(self, screen):
-        # Desenhar o quadrado preto em cima do tanque
+        # draws black square as a tank pointer
         pygame.draw.rect(screen, (0, 0, 0), self.rect_block)
 
     def fire_bullet(self):
