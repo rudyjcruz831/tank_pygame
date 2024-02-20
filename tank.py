@@ -1,14 +1,16 @@
 import pygame
 import math
-from sfx import damage_sound_effect
+from time import time
+from bullet import Bullet
+from utils.colors import RED
+from sfx import shoot_sound_effect
 
 pygame.init()
 
 
 class Tank(pygame.sprite.Sprite):
-    def __init__(self, x, y, color, size, tank_id, obstacles):
+    def __init__(self, x, y, color, size, id, obstacles):
         super().__init__()
-        # design
         self.color = color
         self.size = size
         self.image = pygame.Surface((size, size))
@@ -18,11 +20,19 @@ class Tank(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(x * size, y * size))
         self.dx = 0
         self.dy = 0
-        self.id = tank_id
+        self.id = id
         self.obstacles = obstacles
         self.rect_block = pygame.Rect(100, 200, 10, 10)
         self.block_dx = 0
         self.block_dy = 0
+        self.tank1_initial_time = time()
+        self.tank1_final_time = time()
+        self.tank2_initial_time = time()
+        self.tank2_final_time = time()
+        # bullet and sprite groups
+        self.all_sprites = pygame.sprite.Group()
+        self.bullets = pygame.sprite.Group()
+        self.life = 1
 
     def tank_respawn(self):
         if self.spawned:
@@ -32,24 +42,25 @@ class Tank(pygame.sprite.Sprite):
                 self.go_to('left')
         self.spawned = False
 
-    def update(self, walls, bullets):
+    def update(self, walls):
         # handle initial tank position
         self.tank_respawn()
         self.rect_block.centerx = self.rect.centerx + self.block_dx
         self.rect_block.centery = self.rect.centery + self.block_dy
-        # handle movement
         self.rect.x += self.dx
         self.collider_wall('horizontal')
-
         self.rect.y += self.dy
         self.collider_wall('vertical')
         # handle bullet collision
-        bullet_hit = pygame.sprite.spritecollideany(self, bullets)
+        bullet_hit = pygame.sprite.spritecollideany(self, self.bullets)
         if bullet_hit:
-            self.death()  # assuming death method handles tank removal
+            pass
         self.move()
+        self.tank1_final_time = time()
+        self.tank2_final_time = time()
 
     def go_to(self, direction):
+        print(self.life)
         if direction == 'up':
             self.dy = -5
             self.block_dy = -35
@@ -103,6 +114,7 @@ class Tank(pygame.sprite.Sprite):
                 self.dx = 0
 
     def collider_wall(self, direction):
+        self.all_sprites.update(self.obstacles)
         for wall in self.obstacles:
             if self.rect.colliderect(wall):
                 if direction == 'horizontal':
@@ -110,7 +122,8 @@ class Tank(pygame.sprite.Sprite):
                         self.rect.right = wall.rect.left
                     if self.dx < 0:
                         self.rect.left = wall.rect.right
-                elif direction == 'vertical':
+            if direction == 'vertical':
+                if self.rect.colliderect(wall):
                     if self.dy > 0:
                         self.rect.bottom = wall.rect.top
                     if self.dy < 0:
@@ -119,8 +132,26 @@ class Tank(pygame.sprite.Sprite):
     def death(self):
         # moves tank out of screen
         self.rect.topleft = (1000, 1000)
-        damage_sound_effect.play()
 
     def draw_pointer(self, screen):
-        # draws black square as a pointer of tank direction
+        # Desenhar o quadrado preto em cima do tanque
         pygame.draw.rect(screen, (0, 0, 0), self.rect_block)
+
+    def fire_bullet(self):
+        # handle bullet dir based on tank
+        if self.id == 1:
+            if self.tank1_final_time - self.tank1_initial_time > 2:
+                bullet_direction = (self.block_dx / 3, self.block_dy / 3)
+                self.tank1_initial_time = time()
+                bullet = Bullet(self.rect_block.centerx, self.rect_block.centery, bullet_direction, RED)
+                shoot_sound_effect.play()
+                self.bullets.add(bullet)
+                self.all_sprites.add(bullet)
+        elif self.id == 2:
+            if self.tank2_final_time - self.tank2_initial_time > 2:
+                bullet_direction = (self.block_dx / 3, self.block_dy / 3)
+                bullet = Bullet(self.rect_block.centerx, self.rect_block.centery, bullet_direction, RED)
+                self.tank2_initial_time = time()
+                shoot_sound_effect.play()
+                self.bullets.add(bullet)
+                self.all_sprites.add(bullet)
