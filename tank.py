@@ -118,12 +118,12 @@ class Tank(pygame.sprite.Sprite):
                         self.rect.right = wall.rect.left
                     if self.dx < 0:
                         self.rect.left = wall.rect.right
-            if direction == 'vertical':
-                if self.rect.colliderect(wall):
-                    if self.dy > 0:
-                        self.rect.bottom = wall.rect.top
-                    if self.dy < 0:
-                        self.rect.top = wall.rect.bottom
+                if direction == 'vertical':
+                    if self.rect.colliderect(wall):
+                        if self.dy > 0:
+                            self.rect.bottom = wall.rect.top
+                        if self.dy < 0:
+                            self.rect.top = wall.rect.bottom
 
     def respawn(self):
         self.rect.topleft = (50, 50)
