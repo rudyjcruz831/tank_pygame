@@ -2,9 +2,6 @@
 
 Tank is a top-down view game based on the classic Combat game released in 1977 for the Atari 2600. In this game, Player 1 controls one tank using the W, A, S, and D keys to move and the Space bar to shoot. Player 2 controls another tank using the arrow keys to move and the Enter key to shoot. Each player's score is displayed in the top-left and top-right corners of the screen, and the game lasts for 3 minutes. Tanks respawn in the top-left corner of the map after being hit, and the background, wall colors, and maze pattern change as the game progresses.
 
-# Play game
-https://yut4r0.itch.io/tank-pygame
-
 ## Gameplay
 
 - Player 1 controls a tank using the W, A, S, and D keys to move and the Space bar to shoot.
