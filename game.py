@@ -1,6 +1,7 @@
+import random
 import pygame
 import sys
-import random
+import asyncio
 from maze import Maze
 from utils.maze_list import MAZE_LIST
 from tank import Tank
@@ -126,7 +127,7 @@ class Game:
         # draw tank and bullets
         self.all_sprites.draw(self.screen)
 
-    def run(self):
+    async def run(self):
         running = True
         while running:
             if self.game_start:
@@ -163,3 +164,7 @@ class Game:
             self.handle_events()
             pygame.display.flip()
             self.clock.tick(60)
+            await asyncio.sleep(0)
+
+
+asyncio.run(Game().run())
