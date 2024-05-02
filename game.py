@@ -45,7 +45,8 @@ class Game:
         self.maze = Maze(self.pattern, self.maze_color)
         # tanks
         self.tank1 = Tank(1, 1, WHITE, BLOCK_SIZE, 1, self.maze.walls)
-        self.tank2 = Tank(MAZE_WIDTH - 2, MAZE_HEIGHT - 2, WHITE, BLOCK_SIZE, 2, self.maze.walls)
+        # print(MAZE_HEIGHT, MAZE_WIDTH, MAZE_HEIGHT - 4)
+        self.tank2 = Tank(MAZE_WIDTH-2 , MAZE_HEIGHT - 2, WHITE, BLOCK_SIZE, 2, self.maze.walls)
         # sprite groups
         self.all_sprites = pygame.sprite.Group()
         self.all_sprites.add(self.tank1, self.tank2)

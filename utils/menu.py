@@ -27,6 +27,7 @@ def draw_menu(score1, score2, game_over, screen, show_credits, mid_w, mid_h):
                 "Pedro Yutaro Mont Morency Nakamura",
                 "Aline Daffiny Ferreira Gomes",
                 "Leonardo Melo Crispim",
+                "Rudy Cruz"
                 "<----- Sound Effects ----->",
                 "from past lpc tasks + free sfx libs from Geometry Dash 2.2",
                 "[Back to menu (enter)]"

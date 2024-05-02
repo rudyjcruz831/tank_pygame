@@ -9,15 +9,24 @@ pygame.init()
 
 
 class Tank(pygame.sprite.Sprite):
-    def __init__(self, x, y, color, size, id, obstacles):
+    def __init__(self, x, y, color, size, id, obstacles, scale=1):
         super().__init__()
         self.color = color
         self.size = size
-        self.image = pygame.Surface((size, size))
-        self.image.fill(color)
-        # physics
+        # Load sprite image
+        original_image = pygame.image.load("tanks_tankGrey2.png").convert_alpha()
+        # Resize the image based on the scale
+        scaled_width = 1 * size * scale
+        scaled_height = 1 * size * scale
+        self.original_image = pygame.transform.scale(original_image, (scaled_width, scaled_height))
+        self.image = self.original_image
+        # Calculate the position of the sprite
+        sprite_x = x * size  # x-coordinate in game world
+        sprite_y = y * size  # y-coordinate in game world
+        # Set the position of the sprite
+        self.rect = self.image.get_rect(topleft=(sprite_x, sprite_y))
+        # Other attributes and methods remain the same...
         self.spawned = True
-        self.rect = self.image.get_rect(topleft=(x * size, y * size))
         self.dx = 0
         self.dy = 0
         self.id = id
@@ -30,6 +39,7 @@ class Tank(pygame.sprite.Sprite):
         self.tank2_initial_time = time()
         self.tank2_final_time = time()
         self.score = 0
+        self.angle = 0  # Initial angle
         # bullet and sprite groups
         self.all_sprites = pygame.sprite.Group()
         self.bullets = pygame.sprite.Group()
@@ -61,18 +71,22 @@ class Tank(pygame.sprite.Sprite):
             self.dy = -5
             self.block_dy = -35
             self.block_dx = 0
+            self.angle = 0  # Set angle to face upward
         elif direction == 'down':
             self.dy = 5
             self.block_dy = 35
             self.block_dx = 0
+            # self.angle = 180  # Set angle to face downward
         elif direction == 'left':
             self.dx = -5
             self.block_dy = 0
             self.block_dx = -35
+            self.angle = -90 # Set angle to rotate 90 degrees counterclockwise
         elif direction == 'right':
             self.dx = 5
             self.block_dx = 35
             self.block_dy = 0
+            self.angle = 0 # Set angle to rotate 90 degrees clockwise
         # Normalize diagonal movement
         if self.dx != 0 and self.dy != 0:
             self.dx /= math.sqrt(2)
@@ -129,8 +143,10 @@ class Tank(pygame.sprite.Sprite):
         self.rect.topleft = (50, 50)
 
     def draw_pointer(self, screen):
-        # draws black square as a tank pointer
-        pygame.draw.rect(screen, (0, 0, 0), self.rect_block)
+        # Rotate the tank image and draw
+        rotated_image = pygame.transform.rotate(self.original_image, self.angle)
+        rotated_rect = rotated_image.get_rect(center=self.rect.center)
+        screen.blit(rotated_image, rotated_rect)
 
     def fire_bullet(self):
         # handle bullet dir based on tank
